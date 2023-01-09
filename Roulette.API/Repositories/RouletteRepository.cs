@@ -1,4 +1,5 @@
-﻿using Roulette.API.Interfaces;
+﻿using Dapper;
+using Roulette.API.Interfaces;
 using Roulette.API.Models;
 using System;
 using System.Collections.Generic;
@@ -20,21 +21,42 @@ namespace Roulette.API.Repositories
             return 35.0m * stake;
         }
 
-        public async Task<IEnumerable<PlaceBetResponse>> PlaceBetAsync(int selection, decimal stake)
+        public async Task<PlaceBetResponse> PlaceBetAsync(int selection, decimal stake)
         {
-            //implement dapper save to db here 
-            return await QueryAsync<PlaceBetResponse>("INSERT INTO");
+            //DynamicParameters dynamicParameters = new DynamicParameters();
+            //AddDapperDynamicParameter(dynamicParameters, "@Selection", false, selection);
+            //AddDapperDynamicParameter(dynamicParameters, "@Stake", false, stake);
+
+            var result = await QueryAsync<PlaceBetResponse>($"INSERT INTO BetHistory VALUES({selection}, {stake})", commandType: CommandType.Text);
+
+            if(result.Any() != null)
+            {
+                return new PlaceBetResponse
+                {
+                    ResponseMessage = "Success"
+                };
+            }
+            else
+            {
+                return new PlaceBetResponse
+                {
+                    ResponseMessage = "Error - Unable to Place Bet"
+                };
+            }
         }
 
-        public async Task<IEnumerable<int>> PreviousSpinsAsync()
+        public async Task<List<int>> PreviousSpinsAsync()
         {
-            // return a list of previous spins
-            return await QueryAsync<int>("SELECT TOP 10 Selections FROM RouletteDb");
+            var results = await QueryAsync<int>("SELECT TOP 10 SpinValue FROM SpinHistory", commandType: CommandType.Text);
+            List<int> finalList = results.ToList();
+            return finalList;
         }
 
-        public int Spin()
+        public async Task<int> SpinAsync()
         {
-            return new Random().Next(1, 36);
+            var rnd = new Random().Next(1, 36);
+            await ExecuteAsync($"INSERT INTO SpinHistory VALUES({rnd})", commandType: CommandType.Text);
+            return rnd;
         }
     }
 }

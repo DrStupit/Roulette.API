@@ -8,10 +8,10 @@ namespace Roulette.API.Interfaces
 {
     public interface IRouletteRepository
     {
-        Task<IEnumerable<PlaceBetResponse>> PlaceBetAsync(int selection, decimal stake);
-        int Spin();
+        Task<PlaceBetResponse> PlaceBetAsync(int selection, decimal stake);
+        Task<int> SpinAsync();
         decimal Payout(decimal stake);
-        Task<IEnumerable<int>> PreviousSpinsAsync();
+        Task<List<int>> PreviousSpinsAsync();
     }
 }
 

@@ -18,6 +18,76 @@ namespace Roulette.API.Repositories
             _connectionString = connectionString;
         }
 
+        private static Dictionary<Type, DbType> DAPPERDBTYPEMAP = new Dictionary<Type, DbType>()
+        {
+            [typeof(byte)] = DbType.Byte,
+            [typeof(sbyte)] = DbType.SByte,
+            [typeof(short)] = DbType.Int16,
+            [typeof(ushort)] = DbType.UInt16,
+            [typeof(int)] = DbType.Int32,
+            [typeof(uint)] = DbType.UInt32,
+            [typeof(long)] = DbType.Int64,
+            [typeof(ulong)] = DbType.UInt64,
+            [typeof(float)] = DbType.Single,
+            [typeof(double)] = DbType.Double,
+            [typeof(decimal)] = DbType.Decimal,
+            [typeof(bool)] = DbType.Boolean,
+            [typeof(string)] = DbType.String,
+            [typeof(char)] = DbType.StringFixedLength,
+            [typeof(Guid)] = DbType.Guid,
+            [typeof(DateTime)] = DbType.DateTime,
+            [typeof(DateTimeOffset)] = DbType.DateTimeOffset,
+            [typeof(TimeSpan)] = DbType.Time,
+            [typeof(byte[])] = DbType.Binary,
+            [typeof(byte?)] = DbType.Byte,
+            [typeof(sbyte?)] = DbType.SByte,
+            [typeof(short?)] = DbType.Int16,
+            [typeof(ushort?)] = DbType.UInt16,
+            [typeof(int?)] = DbType.Int32,
+            [typeof(uint?)] = DbType.UInt32,
+            [typeof(long?)] = DbType.Int64,
+            [typeof(ulong?)] = DbType.UInt64,
+            [typeof(float?)] = DbType.Single,
+            [typeof(double?)] = DbType.Double,
+            [typeof(decimal?)] = DbType.Decimal,
+            [typeof(bool?)] = DbType.Boolean,
+            [typeof(char?)] = DbType.StringFixedLength,
+            [typeof(Guid?)] = DbType.Guid,
+            [typeof(DateTime?)] = DbType.DateTime,
+            [typeof(DateTimeOffset?)] = DbType.DateTimeOffset,
+            [typeof(TimeSpan?)] = DbType.Time,
+            [typeof(object)] = DbType.Object
+        };
+
+        /// <summary>
+        /// HACK: Get the DBType for Dapper DynamicParameters
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private DbType LookupDBType(Type type)
+        {
+            var underlyingType = Nullable.GetUnderlyingType(type);
+            if (underlyingType != null) type = underlyingType;
+            if (type.IsEnum && !DAPPERDBTYPEMAP.ContainsKey(type))
+            {
+                type = Enum.GetUnderlyingType(type);
+            }
+            if (DAPPERDBTYPEMAP.TryGetValue(type, out DbType dbType))
+            {
+                return dbType;
+            }
+
+            return DbType.Object;
+        }
+
+        public void AddDapperDynamicParameter<T>(DynamicParameters dbParameters, string paramName, bool IsDirectionOut, T paramObject)
+        {
+            if (paramObject == null)
+                dbParameters.Add(paramName);
+            else
+                dbParameters.Add(paramName, paramObject, LookupDBType(typeof(T)), IsDirectionOut ? ParameterDirection.Output : ParameterDirection.Input);
+        }
+
         public async Task<IEnumerable<T>> QueryAsync<T>(string query, DynamicParameters parameters = null)// where T : class
         {
             return await QueryAsync<T>(query, CommandType.StoredProcedure, parameters);

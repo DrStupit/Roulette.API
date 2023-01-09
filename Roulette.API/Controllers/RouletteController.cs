@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Roulette.API.Interfaces;
+using Roulette.API.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Roulette.API.Controllers
 {
@@ -18,9 +21,9 @@ namespace Roulette.API.Controllers
         // all implementations of Roullte Interface will be accesibble via _rouletteRepo
         [HttpGet]
         [Route("api/[controller]/spin")]
-        public IActionResult Spin()
+        public Task<int> Spin()
         {
-            return Ok(_rouletteRepo.Spin());
+            return _rouletteRepo.SpinAsync();
         }
 
         [HttpGet]
@@ -32,16 +35,17 @@ namespace Roulette.API.Controllers
 
         [HttpGet]
         [Route("api/[controller]/previousspins")]
-        public IActionResult ShowPreviousSpins()
+        public async Task<List<int>> ShowPreviousSpins()
         {
-            return Ok(_rouletteRepo.PreviousSpinsAsync());
+            var result = _rouletteRepo.PreviousSpinsAsync();
+            return await result;
         }
 
         [HttpPost]
         [Route("api/[controller]/placebet")]
-        public IActionResult PlaceBet(int selection, decimal stake)
+        public Task<PlaceBetResponse> PlaceBet(int selection, decimal stake)
         {
-            return Ok(_rouletteRepo.PlaceBetAsync(selection, stake));
+            return _rouletteRepo.PlaceBetAsync(selection, stake);
         }
     }
 }
