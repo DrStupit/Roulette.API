@@ -3,7 +3,7 @@ using Roulette.API.Interfaces;
 
 namespace Roulette.API.Controllers
 {
-
+    [Produces("application/json")]
     public class RouletteController : ControllerBase
     {
         private readonly IRouletteRepository _rouletteRepo;
@@ -32,7 +32,7 @@ namespace Roulette.API.Controllers
 
         [HttpGet]
         [Route("api/[controller]/previousspins")]
-        public IActionResult ShowPreviousSpins(decimal stake)
+        public IActionResult ShowPreviousSpins()
         {
             return Ok(_rouletteRepo.PreviousSpinsAsync());
         }
