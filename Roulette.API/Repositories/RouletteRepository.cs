@@ -23,13 +23,9 @@ namespace Roulette.API.Repositories
 
         public async Task<PlaceBetResponse> PlaceBetAsync(int selection, decimal stake)
         {
-            //DynamicParameters dynamicParameters = new DynamicParameters();
-            //AddDapperDynamicParameter(dynamicParameters, "@Selection", false, selection);
-            //AddDapperDynamicParameter(dynamicParameters, "@Stake", false, stake);
-
             var result = await QueryAsync<PlaceBetResponse>($"INSERT INTO BetHistory VALUES({selection}, {stake})", commandType: CommandType.Text);
 
-            if(result.Any() != null)
+            if (result.Any() != null)
             {
                 return new PlaceBetResponse
                 {

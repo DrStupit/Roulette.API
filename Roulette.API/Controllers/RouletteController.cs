@@ -11,7 +11,7 @@ namespace Roulette.API.Controllers
     {
         private readonly IRouletteRepository _rouletteRepo;
 
-        // now we have used DI to inject the instance once only 
+        // now we have used DI to inject the instance once only for the lifetime (transient)
         public RouletteController(IRouletteRepository rouletteRepo)
         {
             _rouletteRepo = rouletteRepo;
